@@ -1,0 +1,16 @@
+[tasks.dev]
+script = "cargo watch -x clippy -x fmt -x 'nextest run'"
+
+[tasks.dev-run]
+script = "cargo watch -x clippy -x fmt -x 'nextest run' -x run"
+
+[tasks.fmt]
+script = "cargo fmt"
+
+[tasks.tester]
+script = "cargo nextest run"
+
+[tasks.builder]
+condition = { files_modified = { input = ["./Cargo.*", "./src/**/*.rs"], output = ["./target/release/url_shortener"] } }
+script = "cargo build --release"
+dependencies = ["clippy", "fmt", "tester"]
