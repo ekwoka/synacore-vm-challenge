@@ -28,7 +28,9 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut arr = [Default::default(); N];
-        arr.iter_mut().for_each(|x| *x = self.iter.next().unwrap());
+        for i in arr.iter_mut() {
+            *i = self.iter.next()?;
+        }
         Some(arr)
     }
 }

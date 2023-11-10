@@ -2,20 +2,26 @@ mod environment;
 mod operations;
 mod reader;
 
+use environment::{get_memory, load_into_memory, ReadWrite};
 use reader::read_binary;
 use std::process::exit;
 
 fn main() {
-    let mut byte_stream = read_binary();
+    let byte_stream = read_binary();
+
+    load_into_memory(byte_stream);
+
+    let mut position = 0;
 
     loop {
-        if let Some(byte) = byte_stream.next() {
-            match byte {
-                0 => exit(0),
-                19 => print!("{}", char::from(byte_stream.next().unwrap_or(0) as u8)),
-                21 => {}
-                _ => {}
+        match get_memory().read(position) {
+            0 => exit(0),
+            19 => {
+                print!("{}", char::from(get_memory().read(position + 1) as u8));
+                position += 2;
             }
+            21 => position += 1,
+            _ => position += 1,
         }
     }
 }
