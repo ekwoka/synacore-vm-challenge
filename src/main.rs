@@ -3,7 +3,7 @@ mod operations;
 mod reader;
 
 use environment::{get_memory, load_into_memory, ReadWrite};
-use operations::{halt, out};
+use operations::{halt, out, OpCode};
 use reader::read_binary;
 
 fn main() {
@@ -15,15 +15,15 @@ fn main() {
 
     loop {
         position = match get_memory().read(position) {
-            0 => {
+            OpCode::Halt => {
                 halt();
                 position + 1
             }
-            19 => {
+            OpCode::Out => {
                 out(get_memory().read(position + 1));
                 position + 2
             }
-            21 => position + 1,
+            OpCode::Noop => position + 1,
             unk => {
                 println!("unknown opcode: {}", unk);
                 position + 1

@@ -11,6 +11,15 @@ pub fn _retrieve_register(address: u16) -> u16 {
     }
 }
 
+pub struct OpCode {}
+
+#[allow(non_upper_case_globals)]
+impl OpCode {
+    pub const Halt: u16 = 0;
+    pub const Out: u16 = 19;
+    pub const Noop: u16 = 21;
+}
+
 /* == opcode listing ==
 halt: 0
   stop execution and terminate the program */
