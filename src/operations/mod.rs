@@ -1,6 +1,8 @@
 use std::process::exit;
 
-use crate::environment::{ReadWrite, _get_register};
+use crate::environment::{ReadWrite, _get_register, get_memory};
+
+use self::math::SynacoreValue;
 pub mod math;
 
 pub fn _retrieve_register(address: u16) -> u16 {
@@ -8,6 +10,39 @@ pub fn _retrieve_register(address: u16) -> u16 {
         address
     } else {
         _get_register().read(address % 8)
+    }
+}
+
+/**
+ * These structs allow us to easily retrieve arguments from memory in a dynamic manner
+ * The caller can simply pass in the position in memory of the OpCode,
+ * and the function will automatically retrieve the related arguments
+ */
+pub struct SingleArg(u16);
+
+impl From<u16> for SingleArg {
+    fn from(position: u16) -> Self {
+        let mem = get_memory();
+        Self(mem.read(position + 1))
+    }
+}
+
+pub struct DoubleArg(u16, u16);
+impl From<u16> for DoubleArg {
+    fn from(position: u16) -> Self {
+        let mem = get_memory();
+        Self(mem.read(position + 1), mem.read(position + 2))
+    }
+}
+pub struct TripleArg(u16, u16, u16);
+impl From<u16> for TripleArg {
+    fn from(position: u16) -> Self {
+        let mem = get_memory();
+        Self(
+            mem.read(position + 1),
+            mem.read(position + 2),
+            mem.read(position + 2),
+        )
     }
 }
 
@@ -103,8 +138,9 @@ ret: 18
 out: 19 a
   write the character represented by ascii code <a> to the terminal
  */
-pub fn out(a: u16) {
-    print!("{}", char::from(a as u8));
+pub fn out(arg: SingleArg) {
+    let arg: SynacoreValue = arg.0.into();
+    print!("{}", char::from(arg));
 }
 /*
 in: 20 a

@@ -20,7 +20,7 @@ fn main() {
                 position + 1
             }
             OpCode::Out => {
-                out(get_memory().read(position + 1));
+                out(position.into());
                 position + 2
             }
             OpCode::Noop => position + 1,
