@@ -18,30 +18,51 @@ pub fn _retrieve_register(address: u16) -> u16 {
  * The caller can simply pass in the position in memory of the OpCode,
  * and the function will automatically retrieve the related arguments
  */
-pub struct SingleArg(u16);
+pub struct SingleArg<F = u16>(F)
+where
+    F: From<u16>;
 
-impl From<u16> for SingleArg {
+impl<F> From<u16> for SingleArg<F>
+where
+    F: From<u16>,
+{
     fn from(position: u16) -> Self {
         let mem = get_memory();
-        Self(mem.read(position + 1))
+        Self(mem.read(position + 1).into())
     }
 }
 
-pub struct DoubleArg(u16, u16);
-impl From<u16> for DoubleArg {
+pub struct DoubleArg<F, S = F>(F, S)
+where
+    F: From<u16>,
+    S: From<u16>;
+impl<F, S> From<u16> for DoubleArg<F, S>
+where
+    F: From<u16>,
+    S: From<u16>,
+{
     fn from(position: u16) -> Self {
         let mem = get_memory();
-        Self(mem.read(position + 1), mem.read(position + 2))
+        Self(mem.read(position + 1).into(), mem.read(position + 2).into())
     }
 }
-pub struct TripleArg(u16, u16, u16);
-impl From<u16> for TripleArg {
+pub struct TripleArg<F = u16, S = F, T = S>(F, T, S)
+where
+    F: From<u16>,
+    S: From<u16>,
+    T: From<u16>;
+impl<F, S, T> From<u16> for TripleArg<F, S, T>
+where
+    F: From<u16>,
+    S: From<u16>,
+    T: From<u16>,
+{
     fn from(position: u16) -> Self {
         let mem = get_memory();
         Self(
-            mem.read(position + 1),
-            mem.read(position + 2),
-            mem.read(position + 2),
+            mem.read(position + 1).into(),
+            mem.read(position + 2).into(),
+            mem.read(position + 3).into(),
         )
     }
 }
@@ -138,9 +159,8 @@ ret: 18
 out: 19 a
   write the character represented by ascii code <a> to the terminal
  */
-pub fn out(arg: SingleArg) {
-    let arg: SynacoreValue = arg.0.into();
-    print!("{}", char::from(arg));
+pub fn out(args: SingleArg<SynacoreValue>) {
+    print!("{}", char::from(args.0));
 }
 /*
 in: 20 a
