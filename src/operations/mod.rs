@@ -66,16 +66,76 @@ where
         )
     }
 }
-
-pub struct OpCode {}
-
-#[allow(non_upper_case_globals)]
-impl OpCode {
-    pub const Halt: u16 = 0;
-    pub const Out: u16 = 19;
-    pub const Noop: u16 = 21;
+#[derive(Debug)]
+pub enum OpCode {
+    Halt,
+    Set,
+    Push,
+    Pop,
+    Equals,
+    GreaterThan,
+    JumpTo,
+    JumpIfTruthy,
+    JumpIfFalsy,
+    Add,
+    Multiply,
+    Modulo,
+    And,
+    Or,
+    Not,
+    ReadMemoryTo,
+    WriteMemoryFrom,
+    Call,
+    Return,
+    Out,
+    In,
+    Noop,
+    Unknown,
 }
 
+impl From<u16> for OpCode {
+    fn from(position: u16) -> Self {
+        match get_memory().read(position) {
+            0 => OpCode::Halt,
+            1 => OpCode::Set,
+            2 => OpCode::Push,
+            3 => OpCode::Pop,
+            4 => OpCode::Equals,
+            5 => OpCode::GreaterThan,
+            6 => OpCode::JumpTo,
+            7 => OpCode::JumpIfTruthy,
+            8 => OpCode::JumpIfFalsy,
+            9 => OpCode::Add,
+            10 => OpCode::Multiply,
+            11 => OpCode::Modulo,
+            12 => OpCode::And,
+            13 => OpCode::Or,
+            14 => OpCode::Not,
+            15 => OpCode::ReadMemoryTo,
+            16 => OpCode::WriteMemoryFrom,
+            17 => OpCode::Call,
+            18 => OpCode::Return,
+            19 => OpCode::Out,
+            20 => OpCode::In,
+            21 => OpCode::Noop,
+            _ => OpCode::Unknown,
+        }
+    }
+}
+
+impl OpCode {
+    pub fn execute(self, position: &mut u16) {
+        match self {
+            OpCode::Halt => halt(),
+            OpCode::Out => out(position.to_owned().into(), position),
+            OpCode::Noop => noop(position),
+            _ => {
+                println!("unknown opcode: {:?}", self);
+                *position += 1;
+            }
+        }
+    }
+}
 /* == opcode listing ==
 halt: 0
   stop execution and terminate the program */
@@ -159,8 +219,9 @@ ret: 18
 out: 19 a
   write the character represented by ascii code <a> to the terminal
  */
-pub fn out(args: SingleArg<SynacoreValue>) {
+pub fn out(args: SingleArg<SynacoreValue>, position: &mut u16) {
     print!("{}", char::from(args.0));
+    *position += 2;
 }
 /*
 in: 20 a
@@ -169,5 +230,7 @@ in: 20 a
 /*
 noop: 21
   no operation
-  NOTE: just don't implement it
  */
+fn noop(position: &mut u16) {
+    *position += 1;
+}

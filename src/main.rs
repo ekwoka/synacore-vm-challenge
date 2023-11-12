@@ -2,8 +2,8 @@ mod environment;
 mod operations;
 mod reader;
 
-use environment::{get_memory, load_into_memory, ReadWrite};
-use operations::{halt, out, OpCode};
+use environment::load_into_memory;
+use operations::OpCode;
 use reader::read_binary;
 
 fn main() {
@@ -11,23 +11,9 @@ fn main() {
 
     load_into_memory(byte_stream);
 
-    let mut position = 0;
+    let mut position: u16 = 0;
 
     loop {
-        position = match get_memory().read(position) {
-            OpCode::Halt => {
-                halt();
-                position + 1
-            }
-            OpCode::Out => {
-                out(position.into());
-                position + 2
-            }
-            OpCode::Noop => position + 1,
-            unk => {
-                println!("unknown opcode: {}", unk);
-                position + 1
-            }
-        }
+        OpCode::from(position).execute(&mut position);
     }
 }
