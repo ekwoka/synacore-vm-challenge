@@ -51,7 +51,7 @@ pub fn load_into_memory(iter: impl Iterator<Item = u16>) {
 - eight registers
 */
 
-pub fn _get_register() -> &'static Memory<8> {
+pub fn get_register() -> &'static Memory<8> {
     static REGISTER: OnceLock<Memory<8>> = OnceLock::new();
 
     REGISTER.get_or_init(|| Memory {
@@ -62,8 +62,23 @@ pub fn _get_register() -> &'static Memory<8> {
 - an unbounded stack which holds individual 16-bit values
 */
 
-pub fn _get_stack() -> &'static Vec<u16> {
-    static STACK: OnceLock<Vec<u16>> = OnceLock::new();
+pub fn get_stack() -> &'static Stack {
+    static STACK: OnceLock<Stack> = OnceLock::new();
 
-    STACK.get_or_init(Vec::new)
+    STACK.get_or_init(|| Stack {
+        stack: RwLock::new(Vec::new()),
+    })
+}
+
+pub struct Stack {
+    stack: RwLock<Vec<u16>>,
+}
+
+impl Stack {
+    pub fn push(&self, value: u16) {
+        self.stack.write().unwrap().push(value)
+    }
+    pub fn pop(&self) -> Option<u16> {
+        self.stack.write().unwrap().pop()
+    }
 }

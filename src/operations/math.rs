@@ -1,17 +1,23 @@
-use std::ops::Add;
+use std::ops::{Add, BitAnd, BitOr, Mul, Not, Rem};
 
-use super::_retrieve_register;
+use crate::environment::{get_register, ReadWrite};
+
+use super::address::Address;
 
 /*
 - all numbers are unsigned integers 0..32767 (15-bit)
 - all math is modulo 32768; 32758 + 15 => 5
 */
-
+#[derive(Debug, Clone, Copy)]
 pub struct SynacoreValue(pub u16);
 
 impl From<u16> for SynacoreValue {
     fn from(value: u16) -> Self {
-        Self(_retrieve_register(value))
+        if let Address::Reg { address } = value.into() {
+            Self(get_register().read(address))
+        } else {
+            Self(value)
+        }
     }
 }
 
@@ -39,26 +45,54 @@ impl Add<SynacoreValue> for SynacoreValue {
     }
 }
 
-pub fn _safe_add(a: SynacoreValue, b: SynacoreValue) -> u16 {
-    (a + b).into()
+impl Mul<SynacoreValue> for SynacoreValue {
+    type Output = Self;
+
+    fn mul(self, other: Self) -> Self {
+        Self((self.0 as u32 * other.0 as u32) as u16 % 32768)
+    }
 }
 
-pub fn _safe_mul(a: u16, b: u16) -> u16 {
-    (_retrieve_register(a) as u32 * _retrieve_register(b) as u32) as u16 % 32768
+impl Rem<SynacoreValue> for SynacoreValue {
+    type Output = Self;
+
+    fn rem(self, other: Self) -> Self {
+        Self(self.0 % other.0)
+    }
 }
 
-pub fn _safe_mod(a: u16, b: u16) -> u16 {
-    _retrieve_register(a) % _retrieve_register(b)
+impl PartialEq<SynacoreValue> for SynacoreValue {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
 }
 
-pub fn _safe_and(a: u16, b: u16) -> u16 {
-    (_retrieve_register(a) & _retrieve_register(b)) % 32768
+impl PartialOrd<SynacoreValue> for SynacoreValue {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.0.partial_cmp(&other.0)
+    }
 }
 
-pub fn _safe_or(a: u16, b: u16) -> u16 {
-    (_retrieve_register(a) | _retrieve_register(b)) % 32768
+impl BitAnd<SynacoreValue> for SynacoreValue {
+    type Output = Self;
+
+    fn bitand(self, other: Self) -> Self {
+        Self((self.0 & other.0) % 32768)
+    }
 }
 
-pub fn _safe_not(a: u16) -> u16 {
-    !_retrieve_register(a) % 32768
+impl BitOr<SynacoreValue> for SynacoreValue {
+    type Output = Self;
+
+    fn bitor(self, other: Self) -> Self {
+        Self((self.0 | other.0) % 32768)
+    }
+}
+
+impl Not for SynacoreValue {
+    type Output = Self;
+
+    fn not(self) -> Self {
+        Self(!self.0 & 0b0111_1111_1111_1111)
+    }
 }
