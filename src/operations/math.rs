@@ -1,6 +1,6 @@
 use std::ops::{Add, BitAnd, BitOr, Mul, Not, Rem};
 
-use crate::environment::{get_register, ReadWrite};
+use crate::environment::{ReadWrite, REGISTER};
 
 use super::address::Address;
 
@@ -14,7 +14,7 @@ pub struct SynacoreValue(pub u16);
 impl From<u16> for SynacoreValue {
     fn from(value: u16) -> Self {
         if let Address::Reg { address } = value.into() {
-            Self(get_register().read(address))
+            Self(REGISTER.read(address))
         } else {
             Self(value)
         }

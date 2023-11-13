@@ -3,7 +3,7 @@ pub mod math;
 
 use std::{process::exit, sync::RwLock};
 
-use crate::environment::{get_memory, get_register, get_stack, ReadWrite};
+use crate::environment::{ReadWrite, MEMORY, REGISTER, STACK};
 
 use self::{
     address::{Address, Mem, Reg},
@@ -24,8 +24,7 @@ where
     F: From<u16>,
 {
     fn from(position: &mut u16) -> Self {
-        let mem = get_memory();
-        Self(mem.read(*position + 1).into())
+        Self(MEMORY.read(*position + 1).into())
     }
 }
 
@@ -39,7 +38,7 @@ where
     S: From<u16>,
 {
     fn from(position: &mut u16) -> Self {
-        let mem = get_memory();
+        let mem = &MEMORY;
         Self(
             mem.read(*position + 1).into(),
             mem.read(*position + 2).into(),
@@ -58,7 +57,7 @@ where
     T: From<u16>,
 {
     fn from(position: &mut u16) -> Self {
-        let mem = get_memory();
+        let mem = &MEMORY;
         Self(
             mem.read(*position + 1).into(),
             mem.read(*position + 2).into(),
@@ -95,7 +94,7 @@ pub enum OpCode {
 
 impl From<u16> for OpCode {
     fn from(position: u16) -> Self {
-        match get_memory().read(position) {
+        match MEMORY.read(position) {
             0 => OpCode::Halt,
             1 => OpCode::Set,
             2 => OpCode::Push,
@@ -149,11 +148,7 @@ impl OpCode {
             OpCode::In => inp(position.into(), position),
             OpCode::Noop => noop(position),
             _ => {
-                println!(
-                    "unknown opcode: {:?}: {}",
-                    self,
-                    get_memory().read(*position)
-                );
+                println!("unknown opcode: {:?}: {}", self, MEMORY.read(*position));
                 *position += 1;
             }
         }
@@ -171,7 +166,7 @@ pub fn halt() {
   set register <a> to the value of <b>
 */
 fn set(DoubleArg(destination, value): DoubleArg<Reg, SynacoreValue>, position: &mut u16) {
-    get_register().write(destination.address, value.into());
+    REGISTER.write(destination.address, value.into());
     *position += 3;
 }
 
@@ -179,8 +174,7 @@ fn set(DoubleArg(destination, value): DoubleArg<Reg, SynacoreValue>, position: &
  push <a> onto the stack
 */
 fn push(SingleArg(value): SingleArg<SynacoreValue>, position: &mut u16) {
-    let stack = get_stack();
-    stack.push(value.into());
+    STACK.push(value.into());
     *position += 2;
 }
 
@@ -188,8 +182,7 @@ fn push(SingleArg(value): SingleArg<SynacoreValue>, position: &mut u16) {
  remove the top element from the stack and write it into <a>; empty stack = error
 */
 fn pop(SingleArg(destination): SingleArg<Address>, position: &mut u16) {
-    let stack = get_stack();
-    stack
+    STACK
         .pop()
         .map(|value| {
             destination.write(value);
@@ -312,7 +305,7 @@ call: 17 a
  */
 
 fn call(SingleArg(destination): SingleArg<SynacoreValue>, position: &mut u16) {
-    get_stack().push(*position + 2);
+    STACK.push(*position + 2);
     *position = destination.into();
 }
 /*
@@ -320,7 +313,7 @@ ret: 18
   remove the top element from the stack and jump to it; empty stack = halt
  */
 fn ret(position: &mut u16) {
-    get_stack()
+    STACK
         .pop()
         .map(|value| *position = value)
         .expect("Stack should not be empty");

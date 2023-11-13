@@ -1,4 +1,4 @@
-use crate::environment::{get_memory, get_register, ReadWrite};
+use crate::environment::{ReadWrite, MEMORY, REGISTER};
 
 use super::math::SynacoreValue;
 
@@ -11,12 +11,10 @@ impl Address {
     pub fn write(&self, value: u16) {
         match self {
             Self::Reg { address } => {
-                let register = get_register();
-                register.write(*address, value);
+                REGISTER.write(*address, value);
             }
             Self::Mem { address } => {
-                let memory = get_memory();
-                memory.write(*address, value);
+                MEMORY.write(*address, value);
             }
         }
     }
@@ -52,12 +50,10 @@ pub struct Mem {
 
 impl Mem {
     pub fn write(&self, value: u16) {
-        let memory = get_memory();
-        memory.write(self.address, value);
+        MEMORY.write(self.address, value);
     }
     pub fn read(&self) -> u16 {
-        let memory = get_memory();
-        memory.read(self.address)
+        MEMORY.read(self.address)
     }
 }
 
