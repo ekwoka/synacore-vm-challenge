@@ -23,9 +23,9 @@ struct ArrayChunksIter<I, const N: usize> {
 impl<T, const N: usize, I> Iterator for ArrayChunksIter<T, N>
 where
     T: Iterator<Item = I>,
-    I: Default + Clone + Copy
+    I: Default + Clone + Copy,
 {
-    type Item = [T::Item;N];
+    type Item = [T::Item; N];
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut arr = [Default::default(); N];
@@ -61,9 +61,11 @@ fn main() {
     }
 }
 
-
 #[test]
 fn reads_the_challenge_binary() {
-  let initial_bytes = read_binary().take(10).collect::<Vec<u16>>();
-  assert_eq!(initial_bytes, vec![21, 21, 19, 87, 19, 101, 19, 108, 19, 99]);
+    let initial_bytes = read_binary().take(10).collect::<Vec<u16>>();
+    assert_eq!(
+        initial_bytes,
+        vec![21, 21, 19, 87, 19, 101, 19, 108, 19, 99]
+    );
 }
