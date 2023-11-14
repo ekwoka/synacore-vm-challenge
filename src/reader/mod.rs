@@ -55,3 +55,13 @@ fn reads_the_challenge_binary() {
         vec![21, 21, 19, 87, 19, 101, 19, 108, 19, 99]
     );
 }
+
+#[test]
+fn chunks_iterator_to_arrays() {
+    let mut chunks = vec![1, 2, 3, 4, 5, 6, 7, 8, 9]
+        .into_iter()
+        .into_chunks::<3>();
+    assert_eq!(chunks.next(), Some([1, 2, 3]));
+    assert_eq!(chunks.next(), Some([4, 5, 6]));
+    assert_eq!(chunks.next(), Some([7, 8, 9]));
+}
