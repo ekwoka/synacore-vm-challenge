@@ -3,7 +3,7 @@ pub mod math;
 
 use std::{process::exit, sync::RwLock};
 
-use crate::environment::{ReadWrite, MEMORY, REGISTER, STACK};
+use crate::environment::{MEMORY, REGISTER, STACK};
 
 use self::{
     address::{Address, Mem, Reg},

@@ -1,6 +1,6 @@
 use std::ops::{Add, BitAnd, BitOr, Mul, Not, Rem};
 
-use crate::environment::{ReadWrite, REGISTER};
+use crate::environment::REGISTER;
 
 use super::address::Address;
 

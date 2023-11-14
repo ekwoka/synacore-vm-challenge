@@ -12,26 +12,10 @@ impl<const N: usize> Memory<N> {
             memory: RwLock::new([0; N]),
         }
     }
-}
-
-pub trait ReadWrite<const N: usize> {
-    fn write(&self, address: u16, value: u16);
-    fn read(&self, address: u16) -> u16;
-}
-
-impl ReadWrite<MEMORY_SIZE> for Memory<MEMORY_SIZE> {
-    fn write(&self, address: u16, value: u16) {
+    pub fn write(&self, address: u16, value: u16) {
         self.memory.write().unwrap()[address as usize] = value
     }
-    fn read(&self, address: u16) -> u16 {
-        self.memory.read().unwrap()[address as usize]
-    }
-}
-impl ReadWrite<8> for Memory<8> {
-    fn write(&self, address: u16, value: u16) {
-        self.memory.write().unwrap()[address as usize] = value
-    }
-    fn read(&self, address: u16) -> u16 {
+    pub fn read(&self, address: u16) -> u16 {
         self.memory.read().unwrap()[address as usize]
     }
 }

@@ -1,4 +1,4 @@
-use crate::environment::{ReadWrite, MEMORY, REGISTER};
+use crate::environment::{MEMORY, REGISTER};
 
 use super::math::SynacoreValue;
 
